@@ -5,7 +5,6 @@
 -- User Interface and File = 10 marks
 -- Code Quality            =  8 marks
 
-
 -- Type Synonyms
 type Title = String
 type Artist = String
@@ -200,9 +199,109 @@ demo 4  = putStrLn (albumsToString (albumsPrefixedWith "Th" testData))
 demo 5  = putStrLn (show (totalArtistSales "Queen" testData))
 demo 6  = putStrLn (show (artistsNumTop50 testData))
 demo 7  = putStrLn (albumsToString (addNewRemove50th (Album "Progress" "Take That" 2010 270000) testData))
-demo 8  = putStrLn (albumsToString (increaseAlbumSales "16" "Adele" 400000 testData))
+demo 8  = putStrLn (albumsToString (increaseAlbumSales "21" "Adele" 400000 testData))
 
 ----------------------------------- UI Code -----------------------------------
 
---main :: IO()
---main = do
+main :: IO()
+main = do
+    albsStr <- readFile "albums-formated-adt-one-line.txt"
+    putStrLn albsStr
+    --interface (read albsStr :: [Album])
+    --interface albs
+
+interface :: [Album] -> IO()
+interface albs = do
+    printCommands
+    putStrLn "Enter Command:"
+    cmd <- getLine
+    exeComm cmd albs
+
+printCommands :: IO ()
+printCommands = do
+    putStrLn "COMMAND OPTIONS:"
+    putStrLn "Type: 'all'      to print all of the albums."
+    putStrLn "Type: 'top10'    to print the top ten albums by sales"
+    putStrLn "Type: 'range'    to print the albums between an inclusive year range."
+    putStrLn "Type: 'prefix'   to print the albums starting with a specific string."
+    putStrLn "Type: 'artSales' to print the total sales for a given artist."
+    putStrLn "Type: 'artTop50' to print the number of albums each artist has in the top 50."
+    putStrLn "Type: 'add'      to add a new album after removing the 50th album by sales and print the updated album set."
+    putStrLn "Type: 'inc'      to increase the sales value for an album given its title and artist then print the updated album set."
+    putStrLn "Type: 'exit'     to save the album set to file."
+
+
+exeComm :: String -> [Album] -> IO()
+exeComm "all" albs = do
+    putStrLn "ALL ALBUMS:"
+    putStrLn (albumsToString albs)
+    interface albs
+
+exeComm "top10" albs = do
+    putStrLn "TOP 10 ALBUMS:"
+    putStrLn (albumsToString (top10 albs))
+    interface albs
+
+exeComm "range" albs = do 
+    putStrLn "Enter Inclusive Lower Bound:"
+    lb <- getInt
+    putStrLn "Enter Inclusive Upper Bound:"
+    ub <- getInt
+    putStrLn ("ALL ALBUMS FROM " ++ (show lb) ++ " TO " ++ (show ub) ++ " (INCLUSIVE):")
+    putStrLn (albumsToString (albumsByYearRange lb ub albs))
+    interface albs
+
+exeComm "prefix" albs = do
+    putStrLn "Enter Prefix String"
+    pref <- getLine
+    putStrLn ("ALBUMS WITH THE PREFIX '" ++ pref ++ "':")
+    putStrLn (albumsToString (albumsPrefixedWith pref albs))
+    interface albs
+
+exeComm "artSales" albs = do
+    putStrLn "Enter Artist Name:"
+    art <- getLine
+    putStrLn ("TOTAL SALES FOR THE ARTIST '" ++ art ++ "':")
+    putStrLn (show (totalArtistSales art albs))
+    interface albs
+
+exeComm "artTop50" albs = do 
+    putStrLn "LIST OF PAIRS SHOING THE NUMBER OF TOP 50 ALBUMS EACH ARTIST HAS:"
+    putStrLn (show (artistsNumTop50 testData))
+    interface albs
+
+exeComm "add" albs = do
+    putStrLn "Enter New Album Title:"
+    ti <- getLine
+    putStrLn "Enter New Album Artist:"
+    ar <- getLine
+    putStrLn "Enter New Album Release Year:"
+    ry <- getInt
+    putStrLn "Enter New Album Number Of Sales:"
+    ns <- getInt
+    putStrLn "UPDATED ALBUM SET WITH NEW ALBUM:"
+    putStrLn (albumsToString (addNewRemove50th (Album ti ar ry ns) albs))
+    interface albs
+
+exeComm "inc" albs = do
+    putStrLn "Enter Album Name:"
+    ti <- getLine
+    putStrLn "Enter Artist Name:"
+    ar <- getLine
+    putStrLn ("UPDATED ALBUM SET WITH UPDATED ALBUM SALES FOR " ++ ti ++ " by " ++ ar ++ ":")
+    putStrLn (albumsToString (increaseAlbumSales "16" "Adele" 400000 testData))
+    interface albs
+
+exeComm "exit" albs = do
+    putStrLn "ALBUM SET IS BEING SAVED TO FILE."
+    writeFile "albums-formated-adt-one-line.txt" (show albs)    
+    putStrLn "ALBUM SAVED TO FILE. PROGRAM WILL NOW CLOSE."
+
+exeComm _ albs = do
+    putStrLn "Invalid command, try again."
+    interface albs
+
+getInt :: IO Int
+getInt = do 
+    str <- getLine
+    return (read str :: Int)
