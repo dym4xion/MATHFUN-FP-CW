@@ -1,3 +1,5 @@
+-- REMAINING: sanitise getting inputs to validate input value is int (for: range, add, inc)
+
 -- -- -- -- -- -- -- -- MATHFUN FP COURSEWORK 2018/2019 -- -- -- -- -- -- -- --
 -- -- -- -- -- -- -- -- STUDENT NO.: 850844             -- -- -- -- -- -- -- --
 -- ASSESSMENT:
@@ -92,17 +94,11 @@ top10 = take 10
 
 -- III - GIVE ALL ALBUMS THAT WERE RELEASED BETWEEN TWO GIVEN YEARS (INCLUSIVE)
 albumsByYearRange :: Int -> Int -> [Album] -> [Album]
-albumsByYearRange lb ub ((Album t a y s):xs) = if y >= lb && y <= ub
-                                               then (Album t a y s):(albumsByYearRange lb ub xs)
-                                               else albumsByYearRange lb ub xs
-albumsByYearRange _ _ [] = []
+albumsByYearRange lb ub = filter (\(Album _ _ y _) -> y >= lb && y <= ub)
 
 -- IV - GIVE ALL ALBUMS WHOSE TITLES BEGIN WITH A GIVEN PREFIX
 albumsPrefixedWith :: String -> [Album] -> [Album]
-albumsPrefixedWith pre ((Album t a y s):xs) = if pre `isPrefix` t
-                                              then (Album t a y s):(albumsPrefixedWith pre xs)
-                                              else albumsPrefixedWith pre xs
-albumsPrefixedWith _ [] = []                                              
+albumsPrefixedWith pre = filter (\(Album t _ _ _) -> pre `isPrefix` t)
 
 -- Function to determine if string prefixes another string
 isPrefix :: [Char] -> [Char] -> Bool
@@ -117,7 +113,7 @@ totalArtistSales artist li = totalSales (albumsByArtist artist li)
 
 -- Function to produce a list of Albums by artists
 albumsByArtist :: String -> [Album] -> [Album]
-albumsByArtist artist li = filter (\(Album _ a _ _) -> a == artist) li
+albumsByArtist artist = filter (\(Album _ a _ _) -> a == artist)
 
 -- Function to produce total sales of Albums from a list.
 totalSales :: [Album] -> Int
@@ -205,101 +201,108 @@ demo 8  = putStrLn (albumsToString (increaseAlbumSales "21" "Adele" 400000 testD
 
 main :: IO()
 main = do
-    albsStr <- readFile "albums-formated-adt-one-line.txt"
-    putStrLn albsStr
-    --interface (read albsStr :: [Album])
-    --interface albs
+    albums <- getFileContents
+    interface albums
+
+getFileContents :: IO [Album]
+getFileContents = do
+    albsStr <- readFile "albums-forreal.txt"
+    return (read albsStr :: [Album])
 
 interface :: [Album] -> IO()
 interface albs = do
     printCommands
-    putStrLn "Enter Command:"
+    putStr "\nEnter Command: "
     cmd <- getLine
     exeComm cmd albs
 
 printCommands :: IO ()
 printCommands = do
-    putStrLn "COMMAND OPTIONS:"
+    putStrLn "\nCOMMAND OPTIONS:"
     putStrLn "Type: 'all'      to print all of the albums."
     putStrLn "Type: 'top10'    to print the top ten albums by sales"
     putStrLn "Type: 'range'    to print the albums between an inclusive year range."
     putStrLn "Type: 'prefix'   to print the albums starting with a specific string."
     putStrLn "Type: 'artSales' to print the total sales for a given artist."
-    putStrLn "Type: 'artTop50' to print the number of albums each artist has in the top 50."
+    putStrLn "Type: 'artTop50' to print a list of tuples with each artist and the number of albums the artist has in the top 50."
     putStrLn "Type: 'add'      to add a new album after removing the 50th album by sales and print the updated album set."
     putStrLn "Type: 'inc'      to increase the sales value for an album given its title and artist then print the updated album set."
     putStrLn "Type: 'exit'     to save the album set to file."
 
-
 exeComm :: String -> [Album] -> IO()
 exeComm "all" albs = do
-    putStrLn "ALL ALBUMS:"
+    putStrLn "\nALL ALBUMS:"
     putStrLn (albumsToString albs)
     interface albs
 
 exeComm "top10" albs = do
-    putStrLn "TOP 10 ALBUMS:"
+    putStrLn "\nTOP 10 ALBUMS:"
     putStrLn (albumsToString (top10 albs))
     interface albs
 
 exeComm "range" albs = do 
-    putStrLn "Enter Inclusive Lower Bound:"
+    putStr "Enter Inclusive Lower Bound: "
     lb <- getInt
-    putStrLn "Enter Inclusive Upper Bound:"
+    putStr "Enter Inclusive Upper Bound: "
     ub <- getInt
-    putStrLn ("ALL ALBUMS FROM " ++ (show lb) ++ " TO " ++ (show ub) ++ " (INCLUSIVE):")
+    
+    putStrLn ("\nALL ALBUMS FROM " ++ (show lb) ++ " TO " ++ (show ub) ++ " (INCLUSIVE):")
     putStrLn (albumsToString (albumsByYearRange lb ub albs))
     interface albs
 
 exeComm "prefix" albs = do
-    putStrLn "Enter Prefix String"
+    putStr "\nEnter Prefix String: "
     pref <- getLine
-    putStrLn ("ALBUMS WITH THE PREFIX '" ++ pref ++ "':")
+    putStrLn ("\nALBUMS WITH THE PREFIX '" ++ pref ++ "':")
     putStrLn (albumsToString (albumsPrefixedWith pref albs))
     interface albs
 
 exeComm "artSales" albs = do
-    putStrLn "Enter Artist Name:"
+    putStr "\nEnter Artist Name: "
     art <- getLine
-    putStrLn ("TOTAL SALES FOR THE ARTIST '" ++ art ++ "':")
+    putStrLn ("\nTOTAL SALES FOR THE ARTIST '" ++ art ++ "':")
     putStrLn (show (totalArtistSales art albs))
     interface albs
 
 exeComm "artTop50" albs = do 
-    putStrLn "LIST OF PAIRS SHOING THE NUMBER OF TOP 50 ALBUMS EACH ARTIST HAS:"
+    putStrLn "\nLIST OF PAIRS SHOING THE NUMBER OF TOP 50 ALBUMS EACH ARTIST HAS:"
     putStrLn (show (artistsNumTop50 testData))
     interface albs
 
 exeComm "add" albs = do
-    putStrLn "Enter New Album Title:"
+    putStr "Enter New Album Title: "
     ti <- getLine
-    putStrLn "Enter New Album Artist:"
+    putStr "Enter New Album Artist: "
     ar <- getLine
-    putStrLn "Enter New Album Release Year:"
+    putStr "Enter New Album Release Year: "
     ry <- getInt
-    putStrLn "Enter New Album Number Of Sales:"
+    putStr "Enter New Album Number Of Sales: "
     ns <- getInt
-    putStrLn "UPDATED ALBUM SET WITH NEW ALBUM:"
+    putStrLn "\nUPDATED ALBUM SET WITH NEW ALBUM:"
     putStrLn (albumsToString (addNewRemove50th (Album ti ar ry ns) albs))
-    interface albs
+    interface (addNewRemove50th (Album ti ar ry ns) albs)
 
 exeComm "inc" albs = do
-    putStrLn "Enter Album Name:"
+    putStr "Enter Album Name: "
     ti <- getLine
-    putStrLn "Enter Artist Name:"
+    putStr "Enter Artist Name: "
     ar <- getLine
-    putStrLn ("UPDATED ALBUM SET WITH UPDATED ALBUM SALES FOR " ++ ti ++ " by " ++ ar ++ ":")
-    putStrLn (albumsToString (increaseAlbumSales "16" "Adele" 400000 testData))
+    putStr "Enter Quantity of Sales to Increase By: "
+    qty <- getInt
+    putStrLn ("\nUPDATED ALBUM SET WITH UPDATED ALBUM SALES FOR " ++ ti ++ " by " ++ ar ++ ":")
+    putStrLn (albumsToString (increaseAlbumSales ti ar qty albs))
     interface albs
 
 exeComm "exit" albs = do
-    putStrLn "ALBUM SET IS BEING SAVED TO FILE."
-    writeFile "albums-formated-adt-one-line.txt" (show albs)    
+    putStrLn "\nALBUM SET IS BEING SAVED TO FILE."
+    writeToFile albs
     putStrLn "ALBUM SAVED TO FILE. PROGRAM WILL NOW CLOSE."
 
 exeComm _ albs = do
     putStrLn "Invalid command, try again."
     interface albs
+
+writeToFile albs =  writeFile "albums-forreal.txt" (show albs)    
 
 getInt :: IO Int
 getInt = do 
