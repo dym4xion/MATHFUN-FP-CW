@@ -1,11 +1,11 @@
--- REMAINING: sanitise getting inputs to validate input value is int (for: range, add, inc)
-
 -- -- -- -- -- -- -- -- MATHFUN FP COURSEWORK 2018/2019 -- -- -- -- -- -- -- --
 -- -- -- -- -- -- -- -- STUDENT NO.: 850844             -- -- -- -- -- -- -- --
 -- ASSESSMENT:
 -- Core functionality      = 32 marks
 -- User Interface and File = 10 marks
 -- Code Quality            =  8 marks
+
+import Text.Read
 
 -- Type Synonyms
 type Title = String
@@ -71,15 +71,15 @@ testData = [Album "Greatest Hits" "Queen" 1981 6300000,
 
 -------------------------------- Functional Code ------------------------------
 
--- i - convert the list into a single string which, if output using putStrLn, 
--- will display the data formatted neatly into four columns
+-- I - CONVERT THE LIST INTO A SINGLE STRING WHICH, IF OUTPUT USING PUTsTRlN, 
+-- WILL DISPLAY THE DATA FORMATTED NEATLY INTO FOUR COLUMNS
 
--- Method to stringify every element in the strinf to one string.
+-- Function to stringify every element in the album list to one string.
 albumsToString :: [Album] -> String
 albumsToString (x:xs) = albumToString (x) ++ "\n" ++ albumsToString (xs)
 albumsToString [] = ""
 
--- Function to format each album as a string to make columns.
+-- Function to format an album as a string to make columns.
 albumToString :: Album -> String
 albumToString (Album title artist year sales) = title ++ 
                                                 (replicate (37 - length(title)) ' ') ++ 
@@ -206,7 +206,7 @@ main = do
 
 getFileContents :: IO [Album]
 getFileContents = do
-    albsStr <- readFile "albums-forreal.txt"
+    albsStr <- readFile "albums.txt"
     return (read albsStr :: [Album])
 
 interface :: [Album] -> IO()
@@ -295,16 +295,25 @@ exeComm "inc" albs = do
 
 exeComm "exit" albs = do
     putStrLn "\nALBUM SET IS BEING SAVED TO FILE."
-    writeToFile albs
+    writeFile "albums.txt" (show albs)
     putStrLn "ALBUM SAVED TO FILE. PROGRAM WILL NOW CLOSE."
 
 exeComm _ albs = do
     putStrLn "Invalid command, try again."
     interface albs
 
-writeToFile albs =  writeFile "albums-forreal.txt" (show albs)    
 
+-- Would it be better here to force the user to enter a valid integer or to return them to the interface?
 getInt :: IO Int
 getInt = do 
     str <- getLine
-    return (read str :: Int)
+    if (isValidInt str) 
+    then return (read str :: Int)
+    else do
+        putStr "Value is not a valid integer. Try Again: "
+        getInt
+
+isValidInt :: String -> Bool
+isValidInt str
+    | (readMaybe str :: Maybe Integer) == Nothing = False
+    | otherwise = True
