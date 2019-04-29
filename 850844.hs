@@ -71,8 +71,8 @@ testData = [Album "Greatest Hits" "Queen" 1981 6300000,
 
 -------------------------------- Functional Code ------------------------------
 
--- I - CONVERT THE LIST INTO A SINGLE STRING WHICH, IF OUTPUT USING PUTsTRlN, 
--- WILL DISPLAY THE DATA FORMATTED NEATLY INTO FOUR COLUMNS
+-- DEMO I - Convert the list into a single string which, if output using putStrLn, 
+-- will display the data formatted neatly into four columns
 
 -- Function to stringify every element in the album list to one string.
 albumsToString :: [Album] -> String
@@ -88,15 +88,15 @@ albumToString (Album title artist year sales) = title ++
                                                 "  " ++ (show (year)) ++ 
                                                 "  "  ++ (show (sales))
                                                 
--- II - GIVE THE TOP 10 ALBUMS IN DESCENDING ORDER OF SALES
+-- DEMO II - Give the top 10 albums in descending order of sales
 top10 :: [Album] -> [Album]
 top10 = take 10
 
--- III - GIVE ALL ALBUMS THAT WERE RELEASED BETWEEN TWO GIVEN YEARS (INCLUSIVE)
+-- DEMO III - Give all albums that were released between two given years (inclusive)
 albumsByYearRange :: Int -> Int -> [Album] -> [Album]
 albumsByYearRange lb ub = filter (\(Album _ _ y _) -> y >= lb && y <= ub)
 
--- IV - GIVE ALL ALBUMS WHOSE TITLES BEGIN WITH A GIVEN PREFIX
+-- DEMO IV - Give all albums whose titles begin with a given prefix
 albumsPrefixedWith :: String -> [Album] -> [Album]
 albumsPrefixedWith pre = filter (\(Album t _ _ _) -> pre `isPrefix` t)
 
@@ -106,8 +106,8 @@ isPrefix [] _ = True
 isPrefix _ [] = False
 isPrefix (x:xs) (y:ys) = if x == y then isPrefix xs ys else False
 
--- V - GIVE THE TOTAL SALES FIGURE FOR A GIVEN ARTIST (I.E. THE SUM OF THE 
--- SALES FIGURES OF THE ARTIST’S ALBUMS)
+-- V - Give the total sales figure for a given artist (i.e. the sum of the 
+-- sales figures of the artist’s albums)
 totalArtistSales :: String -> [Album] -> Int
 totalArtistSales artist li = totalSales (albumsByArtist artist li)
 
@@ -120,8 +120,8 @@ totalSales :: [Album] -> Int
 totalSales ((Album _ _ _ s):xs) = s + totalSales (xs)
 totalSales [] = 0
 
--- VI - GIVE A LIST OF PAIRS OF ARTISTS’ NAMES WITH THE NUMBER OF ALBUMS 
--- THEY HAVE IN THE TOP 50 (EACH ARTIST SHOULD APPEAR EXACTLY ONCE IN THE RESULT)
+-- DEMO VI - Give a list of pairs of artists’ names with the number of albums 
+-- they have in the top 50 (each artist should appear exactly once in the result)
 artistsNumTop50 :: [Album] -> [(Artist, Int)]
 artistsNumTop50 albs = map (\x -> (x, (numAlbumsByArtInT50 x albs))) uniqArt
                        where
@@ -143,9 +143,9 @@ generateArtistsList :: [Album] -> [Artist]
 generateArtistsList ((Album _ a _ _):xs) = a:(generateArtistsList xs) 
 generateArtistsList [] = []
 
--- VII - REMOVE THE 50TH (LOWEST-SELLING) ALBUM AND ADD A GIVEN (NEW) ALBUM 
--- INTO THE LIST (WHICH MAY BE PLACED HIGHER THAN 50TH PLACE DEPENDING ON ITS 
--- SALES FIGURE)
+-- VII - Remove the 50th (lowest-selling) album and add a given (new) album 
+-- into the list (which may be placed higher than 50th place depending on its 
+-- sales figure)
 addNewRemove50th :: Album -> [Album] -> [Album]
 addNewRemove50th alb li = insertAlbumInOrder alb (take 49 li)
 
@@ -159,10 +159,10 @@ insertAlbumInOrder (Album nt na ny ns) ((Album t a y s):xs) = if ns > s
                                                                 compareAlbum = (Album t a y s)
 insertAlbumInOrder x [] = [x]
 
--- VIII - INCREASE THE SALES FIGURE FOR ONE OF THE ALBUMS GIVEN ITS TITLE & 
--- ARTIST AND THE ADDITIONAL SALES, POSSIBLY CHANGING THE ALBUM’S POSITION 
--- IN THE LIST (IF NO ALBUM WITH THE GIVEN DETAILS EXISTS, THE FUNCTION SHOULD 
--- DO NOTHING)
+-- DEMO VIII - Increase the sales figure for one of the albums given its title & 
+-- artist and the additional sales, possibly changing the album’s position 
+-- in the list (if no album with the given details exists, the function should 
+-- do nothing)
 increaseAlbumSales :: Title -> Artist -> Int -> [Album] -> [Album]
 increaseAlbumSales title artist increm li = insertAlbumInOrder moddedAlbum newList
                                             where
@@ -190,11 +190,17 @@ captureModifyAlbumData _ _ _ [] = error "Album not in list. List not modified."
 demo :: Int -> IO ()
 demo 1  = putStrLn (albumsToString testData)
 demo 2  = putStrLn (albumsToString (top10 testData))
-demo 3  = putStrLn (albumsToString (albumsByYearRange 2000 2008 testData))
+-- all albums released between 2000 and 2008 inclusive
+demo 3  = putStrLn (albumsToString (albumsByYearRange 2000 2008 testData)) 
+-- all albums with titles beginning with "Th" 
 demo 4  = putStrLn (albumsToString (albumsPrefixedWith "Th" testData))
+-- total sales figure for "Queen"
 demo 5  = putStrLn (show (totalArtistSales "Queen" testData))
-demo 6  = putStrLn (show (artistsNumTop50 testData))
-demo 7  = putStrLn (albumsToString (addNewRemove50th (Album "Progress" "Take That" 2010 270000) testData))
+-- all artists with the number of times they appear in the top 50 
+demo 6  = putStrLn (show (artistsNumTop50 testData)) 
+-- albums after removing 50th album and adding "Progress" by "Take That" from 2010 with 2700000 sales
+demo 7  = putStrLn (albumsToString (addNewRemove50th (Album "Progress" "Take That" 2010 2700000) testData))
+-- albums after increasing sales of "21" by "Adele" by 400000
 demo 8  = putStrLn (albumsToString (increaseAlbumSales "21" "Adele" 400000 testData))
 
 ----------------------------------- UI Code -----------------------------------
