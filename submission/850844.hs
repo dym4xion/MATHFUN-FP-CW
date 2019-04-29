@@ -1,4 +1,4 @@
--- -- -- -- -- -- -- -- MATHFUN FP COURSEWORK 2018/2019 -- -- -- -- -- -- -- --
+﻿-- -- -- -- -- -- -- -- MATHFUN FP COURSEWORK 2018/2019 -- -- -- -- -- -- -- --
 -- -- -- -- -- -- -- -- STUDENT NO.: 850844             -- -- -- -- -- -- -- --
 -- ASSESSMENT:
 -- Core functionality      = 32 marks
@@ -236,16 +236,20 @@ printCommands = do
     putStrLn "Type: 'exit'     to save the album set to file."
 
 exeComm :: String -> [Album] -> IO()
+
+-- Pattern match to show all albums.
 exeComm "all" albs = do
     putStrLn "\nALL ALBUMS:"
     putStrLn (albumsToString albs)
     interface albs
 
+-- Pattern match to show the top 10 albums.
 exeComm "top10" albs = do
     putStrLn "\nTOP 10 ALBUMS:"
     putStrLn (albumsToString (top10 albs))
     interface albs
 
+-- Pattern match to show the albums within a range.
 exeComm "range" albs = do 
     putStr "Enter Inclusive Lower Bound: "
     lb <- getInt
@@ -256,6 +260,7 @@ exeComm "range" albs = do
     putStrLn (albumsToString (albumsByYearRange lb ub albs))
     interface albs
 
+-- Pattern match to show the albums with a given prefix.
 exeComm "prefix" albs = do
     putStr "\nEnter Prefix String: "
     pref <- getLine
@@ -263,6 +268,7 @@ exeComm "prefix" albs = do
     putStrLn (albumsToString (albumsPrefixedWith pref albs))
     interface albs
 
+-- Pattern match to show the total sales for an artist.
 exeComm "artSales" albs = do
     putStr "\nEnter Artist Name: "
     art <- getLine
@@ -270,11 +276,13 @@ exeComm "artSales" albs = do
     putStrLn (show (totalArtistSales art albs))
     interface albs
 
+-- Pattern match to show the list of pairs of artists and the number of Top 50s that artist has.
 exeComm "artTop50" albs = do 
     putStrLn "\nLIST OF PAIRS SHOING THE NUMBER OF TOP 50 ALBUMS EACH ARTIST HAS:"
     putStrLn (show (artistsNumTop50 testData))
     interface albs
 
+-- Pattern match to remove the last album add a new album to the album list in order.
 exeComm "add" albs = do
     putStr "Enter New Album Title: "
     ti <- getLine
@@ -288,6 +296,7 @@ exeComm "add" albs = do
     putStrLn (albumsToString (addNewRemove50th (Album ti ar ry ns) albs))
     interface (addNewRemove50th (Album ti ar ry ns) albs)
 
+-- Pattern match to increase the sales value for a given album title and artist.
 exeComm "inc" albs = do
     putStr "Enter Album Name: "
     ti <- getLine
@@ -299,17 +308,19 @@ exeComm "inc" albs = do
     putStrLn (albumsToString (increaseAlbumSales ti ar qty albs))
     interface albs
 
+-- Pattern match to save the current state of the album list to file and then exit the program.
 exeComm "exit" albs = do
     putStrLn "\nALBUM SET IS BEING SAVED TO FILE."
     writeFile "albums.txt" (show albs)
     putStrLn "ALBUM SAVED TO FILE. PROGRAM WILL NOW CLOSE."
 
+-- Pattern match to catch an invalid command.
 exeComm _ albs = do
     putStrLn "Invalid command, try again."
     interface albs
 
 
--- Would it be better here to force the user to enter a valid integer or to return them to the interface?
+-- Function to get a valid integer. Function will loop recursively untill valid integer is entered.
 getInt :: IO Int
 getInt = do 
     str <- getLine
@@ -319,6 +330,7 @@ getInt = do
         putStr "Value is not a valid integer. Try Again: "
         getInt
 
+-- Returns truth value as to whether a string can be an integer.
 isValidInt :: String -> Bool
 isValidInt str
     | (readMaybe str :: Maybe Integer) == Nothing = False
